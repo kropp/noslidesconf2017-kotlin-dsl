@@ -10,7 +10,8 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import java.util.*
+import java.time.LocalDate
+import java.time.Month
 
 fun main(args: Array<String>) {
   val server = embeddedServer(Netty, 8080) {
@@ -20,9 +21,7 @@ fun main(args: Array<String>) {
           val event = VEvent()
           event.setSummary("Christmas")
 
-          val date = GregorianCalendar(2017, 11, 25).time
-          event.setDateStart(date)
-          event.setDateEnd(date)
+          event.date = 25 December 2017
 
           addEvent(event)
         }
@@ -33,3 +32,13 @@ fun main(args: Array<String>) {
 }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.calendar(builder: ICalendar.() -> Unit) = call.respondText(Biweekly.write(ICalendar().apply(builder)).go(), ContentType.Text.Plain)
+
+infix fun Int.December(year: Int) = LocalDate.of(year, Month.DECEMBER, this)!!
+
+var VEvent.date: LocalDate
+  set(value) {
+    val date = java.sql.Date.valueOf(value)
+    setDateStart(date)
+    setDateEnd(date)
+  }
+  get() = TODO()
