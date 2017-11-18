@@ -29,9 +29,9 @@ fun main(args: Array<String>) {
           }
 
           val `4th Advent` = Sunday before Christmas
-          for (Advent in `4th Advent` - 3 * week .. `4th Advent` every week) {
+          (`4th Advent` - 3 * week .. `4th Advent` every week).forEachIndexed { i, Advent ->
             event {
-              title = "Advent"
+              title = "$i Advent"
               date = Advent
             }
           }
