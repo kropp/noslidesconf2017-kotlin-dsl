@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
           }
 
           val `4th Advent` = Sunday before Christmas
-          (`4th Advent` - 3 * week .. `4th Advent` every week).forEachIndexed { i, Advent ->
+          (`4th Advent` - 3 * week .. `4th Advent` every week) { i, Advent ->
             event {
               title = "$i Advent"
               date = Advent
@@ -43,8 +43,13 @@ fun main(args: Array<String>) {
 }
 
 
+@DslMarker
+@Target(AnnotationTarget.TYPE)
+annotation class CalendarDsl
 
-suspend fun PipelineContext<Unit, ApplicationCall>.calendar(builder:  ICalendar.() -> Unit) = call.respondText(Biweekly.write(ICalendar().apply(builder)).go(), ContentType.Text.Plain)
+operator fun <T> Sequence<T>.invoke(body: (Int, T) -> Unit) = forEachIndexed(body)
+
+suspend fun PipelineContext<Unit, ApplicationCall>.calendar(builder: (@CalendarDsl ICalendar).() -> Unit) = call.respondText(Biweekly.write(ICalendar().apply(builder)).go(), ContentType.Text.Plain)
 
 infix fun Int.December(year: Int) = LocalDate.of(year, Month.DECEMBER, this)!!
 
@@ -56,7 +61,7 @@ var VEvent.date: LocalDate
   }
   get() = TODO()
 
-fun ICalendar.event(builder: VEvent.() -> Unit) = addEvent(VEvent().apply(builder))
+fun ICalendar.event(builder: (@CalendarDsl VEvent).() -> Unit) = addEvent(VEvent().apply(builder))
 var VEvent.title: String
   set(value) {
     setSummary(value)
